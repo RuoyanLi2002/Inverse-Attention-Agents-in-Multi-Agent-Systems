@@ -1,0 +1,9 @@
+*.mp4
+*.jpg
+logs
+__pycache__
+*.pkl
+.history
+data
+EbOR
+*.sh
