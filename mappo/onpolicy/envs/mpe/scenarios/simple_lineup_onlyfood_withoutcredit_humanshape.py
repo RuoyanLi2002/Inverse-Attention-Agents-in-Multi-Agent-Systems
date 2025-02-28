@@ -367,3 +367,148 @@ class Scenario(BaseScenario):
         gf.append([action[4], 0.0])
 
         return gf
+    # -------------------- USELESS CODE --------------------
+
+    def same_team(self, agent1, agent2):
+        return agent1.adversary == agent2.adversary
+    
+    def within_region(self, x, y):
+        return -0.8 < x < 0.8 and -0.8 < y < 0.8
+    
+    def within_corner(self, x, y):
+        if -1 <= x < -0.8 and 0.8 < y <= 1:
+            return True
+        elif -1 <= x < -0.8 and -1 <= y < -0.8:
+            return True
+        elif 0.8 < x <= 1 and 0.8 < y <= 1:
+            return True
+        elif 0.8 < x <= 1 and -1 <= y < -0.8:
+            return True
+        
+        return False
+    
+    def generate_wall_gf(self, agent):
+        x = agent.state.p_pos[0]
+        y = agent.state.p_pos[1]
+
+        if self.within_region(x, y):
+            return np.array([0.0, 0.0])
+        elif not self.within_corner(x, y):
+            if x < -0.8:
+                return np.array([1.0, 0.0])
+            elif x > 0.8: 
+                return np.array([-1.0, 0.0])
+            elif y > 0.8: 
+                return np.array([0.0, -1.0])
+            elif y < -0.8: 
+                return np.array([0.0, 1.0])
+        else:
+            return -agent.state.p_pos/np.linalg.norm(agent.state.p_pos)
+    
+    def visualize_gf_wall(self, state, gf, agent, world):    	
+        agent_num = self.find_agent_num(agent, world)
+
+        x = state[0]
+        y = state[1]
+        category = state[2]
+
+        gf_x = gf[0].item()
+        gf_y = gf[1].item()
+        color = 'green' if category == 0 else 'red'
+        plt.scatter(x, y, color=color, label = f"Agent{agent_num}")
+        plt.quiver(x, y, gf_x, gf_y, scale=5, scale_units='inches')
+            
+        plt.xlim(-1.5, 1.5)
+        plt.ylim(-1.5, 1.5)
+        plt.grid(True)
+        plt.legend()
+        plt.title(f"Gradient Field of Agent{agent_num} with Wall")
+
+        if not os.path.exists(f"GF/Agent{agent_num}"):
+            os.makedirs(f"GF/Agent{agent_num}")
+
+        plt.savefig(f'GF/Agent{agent_num}/gradient_field{self.gf_num}.png')
+        plt.clf()
+        self.gf_num += 1
+
+    def visualize_gf_agent(self, state, gf, agent, other_agent, world, num_objs = 2):
+        state = state.reshape(num_objs, 3)
+    	
+        agent_num = self.find_agent_num(agent, world)
+        other_agent_num = self.find_agent_num(other_agent, world)
+        ls_num = [agent_num, other_agent_num]
+        for i in range(num_objs):
+            x = state[i][0]
+            y = state[i][1]
+            category = state[i][2]
+            
+            gf_x = gf[i][0].item() if category==1 else -gf[i][0].item()
+            gf_y = gf[i][1].item() if category==1 else -gf[i][1].item()
+            color = 'green' if category == 0 else 'red'
+            plt.scatter(x, y, color=color, label = f"Agent{ls_num[i]}")
+            plt.quiver(x, y, gf_x, gf_y, scale=5, scale_units='inches')
+            
+        plt.xlim(-1.5, 1.5)
+        plt.ylim(-1.5, 1.5)
+        plt.grid(True)
+        plt.legend()
+        plt.title(f"Gradient Field of Agent{agent_num} with Agent{other_agent_num}")
+        if not os.path.exists(f"GF/Agent{agent_num}"):
+            os.makedirs(f"GF/Agent{agent_num}")
+        plt.savefig(f'GF/Agent{agent_num}/gradient_field{self.gf_num}.png')
+        plt.clf()
+        self.gf_num += 1
+
+    def visualize_gf_imagined_we(self, state, gf, agent, other_agent, world, num_objs = 2):
+        state = state.reshape(num_objs, 3)
+    	
+        agent_num = self.find_agent_num(agent, world)
+        other_agent_num = self.find_agent_num(other_agent, world)
+        ls_num = [agent_num, other_agent_num]
+        for i in range(num_objs):
+            x = state[i][0]
+            y = state[i][1]
+            category = state[i][2]
+            
+            gf_x = gf[i][0].item() if category==1 else -gf[i][0].item()
+            gf_y = gf[i][1].item() if category==1 else -gf[i][1].item()
+            color = 'green' if category == 0 else 'red'
+            plt.scatter(x, y, color=color, label = f"Agent{ls_num[i]}")
+            plt.quiver(x, y, gf_x, gf_y, scale=5, scale_units='inches')
+            
+        plt.xlim(-1.5, 1.5)
+        plt.ylim(-1.5, 1.5)
+        plt.grid(True)
+        plt.legend()
+        plt.title(f"Imagined We Gradient Field of Agent{agent_num} with Agent{other_agent_num}")
+        if not os.path.exists(f"GF/Agent0/Imagined_We"):
+            os.makedirs(f"GF/Agent0/Imagined_We")
+        plt.savefig(f'GF/Agent0/Imagined_We/gradient_field{self.gf_num}.png')
+        plt.clf()
+        self.gf_num += 1
+
+    def visualize_wall_gf_imagined_we(self, state, gf, agent, world, num_objs = 2):
+        agent_num = self.find_agent_num(agent, world)
+
+        x = state[0]
+        y = state[1]
+        category = state[2]
+
+        gf_x = gf[0].item()
+        gf_y = gf[1].item()
+        color = 'green' if category == 0 else 'red'
+        plt.scatter(x, y, color=color, label = f"Agent{agent_num}")
+        plt.quiver(x, y, gf_x, gf_y, scale=5, scale_units='inches')
+            
+        plt.xlim(-1.5, 1.5)
+        plt.ylim(-1.5, 1.5)
+        plt.grid(True)
+        plt.legend()
+        plt.title(f"Imagined We Gradient Field of Agent{agent_num} with Wall")
+
+        if not os.path.exists(f"GF/Agent0/Imagined_We"):
+            os.makedirs(f"GF/Agent0/Imagined_We")
+
+        plt.savefig(f'GF/Agent0/Imagined_We/gradient_field{self.gf_num}.png')
+        plt.clf()
+        self.gf_num += 1

@@ -111,6 +111,9 @@ class Embed_sheep_wolf_landmark(nn.Module):
         self.landmark_fc1 = torch.nn.Linear(input_dim, hidden_dim)
         self.landmark_fc2 = torch.nn.Linear(hidden_dim, hidden_dim)
 
+        self.wall_fc1 = torch.nn.Linear(input_dim, hidden_dim)
+        self.wall_fc2 = torch.nn.Linear(hidden_dim, hidden_dim)
+
         self.relu = F.relu
 
         if not train_module:
@@ -120,7 +123,7 @@ class Embed_sheep_wolf_landmark(nn.Module):
         else:
             print(f"AGENT{agent_num} EMBED IS TRAIN")
 
-    def forward(self, velocity, wolf_gf, sheep_gf, landmark_gf):
+    def forward(self, velocity, wolf_gf, sheep_gf, landmark_gf, wall_gf):
         velocity_embed = self.velocity_fc1(velocity)
         velocity_embed = self.relu(velocity_embed)
         velocity_embed = self.velocity_fc2(velocity_embed)
@@ -141,4 +144,9 @@ class Embed_sheep_wolf_landmark(nn.Module):
         landmark_gf_embed = self.landmark_fc2(landmark_gf_embed)
         landmark_gf_embed = self.relu(landmark_gf_embed)
 
-        return velocity_embed, wolf_gf_embed, sheep_gf_embed, landmark_gf_embed
+        wall_gf_embed = self.wall_fc1(wall_gf)
+        wall_gf_embed = self.relu(wall_gf_embed)
+        wall_gf_embed = self.wall_fc2(wall_gf_embed)
+        wall_gf_embed = self.relu(wall_gf_embed)
+
+        return velocity_embed, wolf_gf_embed, sheep_gf_embed, landmark_gf_embed, wall_gf_embed

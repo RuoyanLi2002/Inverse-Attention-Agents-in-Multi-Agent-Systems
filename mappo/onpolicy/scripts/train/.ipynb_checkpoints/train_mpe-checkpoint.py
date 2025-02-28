@@ -60,7 +60,6 @@ def parse_args(args, parser):
     parser.add_argument('--num_agents', type=int,
                         default=2, help="number of players")
     parser.add_argument("--shape_reward", action='store_true', default=False)
-    parser.add_argument("--policy", type=int, default=0)
 
     all_args = parser.parse_known_args(args)[0]
 

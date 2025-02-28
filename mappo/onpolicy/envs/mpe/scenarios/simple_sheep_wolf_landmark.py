@@ -14,7 +14,7 @@ import functools
 import os
 from matplotlib import pyplot as plt
 
-sys.path.append('/root/targfupdate/')
+sys.path.append('/root/exp1/targfupdate/')
 from Algorithms.BallSDE import marginal_prob_std, diffusion_coeff
 
 obs = 0.5
@@ -127,10 +127,9 @@ class Scenario(BaseScenario):
         
         world.past_obs = [[np.random.standard_normal(2).tolist() for i in range(self.num_agents+num_landmarks)] for j in range(self.num_agents)]
         world.new_obs = [[] for _ in range(self.num_agents)]
-
-        # world.ls_policy = ["GF+ATTENTION" for i in range(self.num_agents)]
-        # world.ls_policy = ["GF+ATTENTION", "TOM", "GF+ATTENTION", "GF+ATTENTION", "GF+ATTENTION", "GF+ATTENTION", "GF+ATTENTION", "GF+ATTENTION"]
-        world.ls_policy = ["MAPPO" for i in range(self.num_agents)]
+        
+        policy = "MAPPO" if args.policy == 0 else "GF+ATTENTION"
+        world.ls_policy = [policy for i in range(self.num_agents)]
         return world
 
     def reset_world(self, world):
@@ -241,7 +240,7 @@ class Scenario(BaseScenario):
         for landmark in world.landmarks:
             landmark_pos.append(landmark.state.p_pos - agent.state.p_pos)
 
-        return np.concatenate([agent.state.p_pos]+[agent.state.p_vel] + other_pos + landmark_pos)
+        return np.concatenate([agent.state.p_vel] + other_pos + landmark_pos)
 
     def obs_GFATTENTION(self, agent, world):
         agent_num = self.find_agent_num(agent, world)
@@ -333,10 +332,9 @@ class Scenario(BaseScenario):
         agent_num = self.find_agent_num(agent, world)
         policy = world.ls_policy[agent_num]
         if policy == "MAPPO":
-            return self.obs_GFATTENTION(agent, world)
-            # return self.obs_MAPPO(agent, world)
+            return self.obs_MAPPO(agent, world)
         elif policy == "GF+ATTENTION":
-            return self.obs_GFATTENTION(agent, world)
+            return self.obs_MAPPO(agent, world)
         elif policy == "TOM":
             return self.obs_TOM(agent, world)
         
@@ -358,7 +356,7 @@ class Scenario(BaseScenario):
 
     def load_target_score(self, num_objs, max_action):
         diffusion_coeff_func = functools.partial(diffusion_coeff, sigma=25)
-        tar_path = '/root/targfupdate/score_wolf2.pt'
+        tar_path = '/root/exp1/targfupdate/score_wolf2.pt'
         with open(tar_path, 'rb') as f:
             # score_target = pickle.load(f)
             score_target = CPU_Unpickler(f).load()
@@ -366,7 +364,7 @@ class Scenario(BaseScenario):
     
     def load_target_score_wall(self, num_objs, max_action):
         diffusion_coeff_func = functools.partial(diffusion_coeff, sigma=25)
-        tar_path = '/root/targfupdate/score_wall2_fc.pt'
+        tar_path = '/root/exp1/targfupdate/score_wall2_fc.pt'
         with open(tar_path, 'rb') as f:
             # score_target = pickle.load(f)
             score_target = CPU_Unpickler(f).load()

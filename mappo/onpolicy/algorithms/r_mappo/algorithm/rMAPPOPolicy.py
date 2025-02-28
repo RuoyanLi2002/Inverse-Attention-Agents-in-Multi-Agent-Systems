@@ -1,5 +1,7 @@
 import torch
 from onpolicy.algorithms.r_mappo.algorithm.r_actor_critic import R_Critic, R_Actor
+from onpolicy.algorithms.r_mappo.algorithm.r_actor_critic_att import R_Critic_ATTENTION, R_Actor_ATTENTION
+from onpolicy.algorithms.r_mappo.algorithm.r_actor_critic_tom import R_Critic_TOM, R_Actor_TOM
 from onpolicy.utils.util import update_linear_schedule
 
 class R_MAPPOPolicy:
@@ -25,12 +27,20 @@ class R_MAPPOPolicy:
         self.act_space = act_space
 
         seed = args.seed
-        temp = "wolf" if agent_num < args.num_adv else "sheep"
-        print(f"{policy_type}: {agent_num} {temp}")
-        
-        self.actor = R_Actor(args, self.obs_space, self.act_space)
-        self.critic = R_Critic(args, self.share_obs_space, self.device)
-
+        agent_type = "wolf" if agent_num < args.num_adv else "sheep"
+        print(f"{policy_type}: {agent_num} {agent_type}")
+        if policy_type == "MAPPO":
+            self.actor = R_Actor(args, self.obs_space, self.act_space)
+            self.critic = R_Critic(args, self.share_obs_space, self.device)
+        elif policy_type == "GF+ATTENTION":
+            self.actor = R_Actor_ATTENTION(args, self.obs_space, self.act_space, agent_num = agent_num, train_module = True,
+                                           agent_type = agent_type, device = self.device)
+            self.critic = R_Critic_ATTENTION(args, self.share_obs_space, agent_num = agent_num, train = True, device = self.device)
+        else:
+            self.actor = R_Actor_TOM(args, self.obs_space, self.act_space, agent_num = agent_num, train_module = True,
+                                           agent_type = agent_type, device = self.device, seed = seed)
+            self.critic = R_Critic_TOM(args, self.share_obs_space, agent_num = agent_num, train_module = True, device = self.device, seed = seed)
+            
         print("--------------------")
 
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(),
